@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gameList>
+  <game>
+    <path>./PocketTank.sh</path>
+    <name>Pocket Tank</name>
+    <desc>Care for your fish in a tiny living aquarium. Move with the D-pad or left stick; select with A or click the stick. Hold Start + Select to save and exit.</desc>
+    <image>./PocketTank-cover.svg</image>
+    <developer>Pocket Tank</developer>
+  </game>
+</gameList>

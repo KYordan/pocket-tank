@@ -487,6 +487,15 @@ twenty seconds of silence keep everything.
 
 ## Try it: PC simulator
 
+### ArkOS community port
+
+An unofficial 64-bit ARM ArkOS community port for R36S / RG351MP-class
+handhelds is maintained by [KYordan](https://github.com/KYordan). It runs the
+SDL2 simulator full-screen from EmulationStation Ports, supports the D-pad or
+left stick to move and A or left-stick click to select, and saves/exits when
+Start + Select are held. See [`installer/arkos/README.md`](installer/arkos/README.md)
+for installation instructions. The upstream author does not endorse this port.
+
 The simulator runs the exact same `common/` code inside an LVGL + SDL2
 window, with the shipped model as the brain. Needs SDL2 and LVGL v9 (cloned
 in-tree):

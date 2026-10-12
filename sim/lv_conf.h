@@ -13,6 +13,7 @@
 #define LV_USE_STDLIB_SPRINTF LV_STDLIB_CLIB
 
 #define LV_USE_SDL 1
+#define LV_SDL_FULLSCREEN 1
 
 #define LV_USE_CANVAS 1
 #define LV_USE_LOG 0

@@ -2012,6 +2012,26 @@ static void sim_flip_canvas(void) {
     s_canvas_flipped = !s_canvas_flipped;
 }
 
+static bool pad_cursor_visible;
+static int pad_cursor_x = TANK_W / 2, pad_cursor_y = TANK_H / 2;
+
+static void draw_pad_cursor(void) {
+    if (!pad_cursor_visible) return;
+    int x = pad_cursor_x, y = pad_cursor_y;
+    for (int d = -7; d <= 7; d++) {
+        if (d < -2 || d > 2) {
+            if (x + d >= 0 && x + d < TANK_W && y >= 0 && y < TANK_H)
+                canvas_buf[y * TANK_W + x + d] = 0xFFFF;
+            if (x >= 0 && x < TANK_W && y + d >= 0 && y + d < TANK_H)
+                canvas_buf[(y + d) * TANK_W + x] = 0xFFFF;
+        }
+    }
+    for (int dy = -1; dy <= 1; dy++)
+        for (int dx = -1; dx <= 1; dx++)
+            if (x + dx >= 0 && x + dx < TANK_W && y + dy >= 0 && y + dy < TANK_H)
+                canvas_buf[(y + dy) * TANK_W + x + dx] = 0x07FF;
+}
+
 static void frame_cb(lv_timer_t *timer) {
     (void)timer;
     if (s_canvas_flipped) sim_flip_canvas();
@@ -2079,6 +2099,7 @@ static void frame_cb(lv_timer_t *timer) {
     if (confirm_view) render_confirm_reset(canvas_buf, TANK_W, 1.0f - (SDL_GetTicks() - confirm_ms) / (float)CONFIRM_MS);
     round_mask();
     if (sim_view_turned()) sim_flip_canvas();
+    draw_pad_cursor();
     lv_obj_invalidate(canvas);
 }
 
@@ -4133,6 +4154,24 @@ int main(int argc, char **argv) {
     last_ms = SDL_GetTicks();
     lv_timer_create(frame_cb, 16, NULL);
 
+    /* R36S gamepad support */
+    SDL_Joystick *pad = NULL;
+    int pad_x = TANK_W / 2, pad_y = TANK_H / 2;
+    uint32_t exit_chord_since = 0;
+
+    if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) == 0) {
+        SDL_JoystickEventState(SDL_ENABLE);
+        if (SDL_NumJoysticks() > 0) {
+            pad = SDL_JoystickOpen(0);
+            if (pad)
+                printf("gamepad: %s (%d buttons, %d axes)\\n",
+                       SDL_JoystickName(pad),
+                       SDL_JoystickNumButtons(pad),
+                       SDL_JoystickNumAxes(pad));
+        }
+    }
+    SDL_ShowCursor(SDL_ENABLE);
+
     bool fdown = false, ndown = false, ldown = false;
     bool udown = false, mdown = false, mkdown = false, rdown = false, zdown = false, gdown = false, xdown = false, sdown = false, vdown = false, bdown = false, fourdown = false, ddown = false;
     bool cdown = false;             /* C: the castle prototype */
@@ -4148,13 +4187,79 @@ int main(int argc, char **argv) {
     while (1) {
         uint32_t wait = lv_timer_handler();
         const Uint8 *k = SDL_GetKeyboardState(NULL);
+
+        /* D-pad plus left analog stick move the virtual pointer. */
+        if (pad) {
+            SDL_JoystickUpdate();
+            int dx = 0, dy = 0;
+            /* ArkOS exposes the D-pad as a hat on common R36S mappings. */
+            if (SDL_JoystickNumHats(pad) > 0) {
+                Uint8 hat = SDL_JoystickGetHat(pad, 0);
+                if (hat & SDL_HAT_LEFT)  dx -= 1;
+                if (hat & SDL_HAT_RIGHT) dx += 1;
+                if (hat & SDL_HAT_UP)    dy -= 1;
+                if (hat & SDL_HAT_DOWN)  dy += 1;
+            }
+            /* Also accept mappings that expose the D-pad as buttons. */
+            if (SDL_JoystickGetButton(pad, 10)) dx -= 1;
+            if (SDL_JoystickGetButton(pad, 11)) dx += 1;
+            if (SDL_JoystickGetButton(pad, 8))  dy -= 1;
+            if (SDL_JoystickGetButton(pad, 9))  dy += 1;
+
+            if (SDL_JoystickNumAxes(pad) >= 2) {
+                Sint16 ax = SDL_JoystickGetAxis(pad, 0);
+                Sint16 ay = SDL_JoystickGetAxis(pad, 1);
+                if (ax < -8000) dx -= 1;
+                if (ax >  8000) dx += 1;
+                if (ay < -8000) dy -= 1;
+                if (ay >  8000) dy += 1;
+            }
+
+            if (dx || dy) {
+                pad_x += dx * 2;
+                pad_y += dy * 2;
+                if (pad_x < 0) pad_x = 0;
+                if (pad_y < 0) pad_y = 0;
+                if (pad_x >= TANK_W) pad_x = TANK_W - 1;
+                if (pad_y >= TANK_H) pad_y = TANK_H - 1;
+
+                SDL_Window *w = SDL_GetMouseFocus();
+                if (w) SDL_WarpMouseInWindow(w, pad_x, pad_y);
+            }
+        }
+
         int mx, my;
-        bool mpress = SDL_GetMouseState(&mx, &my) & SDL_BUTTON(SDL_BUTTON_LEFT);
+        bool mouse_press =
+            (SDL_GetMouseState(&mx, &my) & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;
+        /* A and the left-stick click both act as the touch press. */
+        bool pad_press = pad && (SDL_JoystickGetButton(pad, 1) ||
+                                 SDL_JoystickGetButton(pad, 14));
+        /* Preserve the full press/release gesture for the touch state machine. */
+        bool mpress = mouse_press || pad_press;
+
+        /* Use the virtual pointer coordinates on the handheld. */
+        if (pad) { mx = pad_x; my = pad_y; }
         if (sim_view_turned()) { mx = TANK_W - 1 - mx; my = TANK_H - 1 - my; }   /* the window shows the glass turned: the finger is too */
+        if (pad) { pad_cursor_visible = true; pad_cursor_x = mx; pad_cursor_y = my; }
         { static int lmx = -1, lmy = -1;            /* a hand near the tank: the mouse moving over the window */
           if (mx != lmx || my != lmy || mpress || k[SDL_SCANCODE_H]) tank_handled(&tank);
           lmx = mx; lmy = my; }
         uint32_t now_ms = SDL_GetTicks();
+
+        /* Hold START + SELECT for one second to save and exit. */
+        if (pad && SDL_JoystickNumButtons(pad) > 13 &&
+            SDL_JoystickGetButton(pad, 12) &&
+            SDL_JoystickGetButton(pad, 13)) {
+            if (!exit_chord_since) exit_chord_since = now_ms;
+            if (now_ms - exit_chord_since >= 1000) {
+                printf("gamepad: START+SELECT - saving and exiting\\n");
+                progression_save(&tank);
+                break;
+            }
+        } else {
+            exit_chord_since = 0;
+        }
+
         /* mouse -> touch gestures (device: FT3168 does the same job)
          *   press+release < 350 ms, little movement: TAP (on a fish = select its card;
          *                                              card up + empty glass = dismiss;
@@ -4445,5 +4550,7 @@ int main(int argc, char **argv) {
         ldown = k[SDL_SCANCODE_L];
         SDL_Delay(wait < 5 ? 5 : (wait > 16 ? 16 : wait));
     }
+    if (pad) SDL_JoystickClose(pad);
+    SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
     return 0;
 }

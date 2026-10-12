@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 640" width="480" height="640">
+  <defs>
+    <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#071827"/><stop offset=".55" stop-color="#0b3348"/><stop offset="1" stop-color="#06131f"/></linearGradient>
+    <linearGradient id="tank" x2="0" y2="1"><stop stop-color="#156181"/><stop offset=".5" stop-color="#0b405b"/><stop offset="1" stop-color="#092538"/></linearGradient>
+    <linearGradient id="water" x2="0" y2="1"><stop stop-color="#2ad1d4" stop-opacity=".42"/><stop offset="1" stop-color="#08728b" stop-opacity=".72"/></linearGradient>
+    <linearGradient id="fish" x2="0" y2="1"><stop stop-color="#ffd38a"/><stop offset="1" stop-color="#ff8a55"/></linearGradient>
+  </defs>
+  <rect width="480" height="640" rx="28" fill="url(#bg)"/>
+  <circle cx="398" cy="88" r="74" fill="#31cbd4" opacity=".07"/>
+  <text x="240" y="74" text-anchor="middle" fill="#f0ffff" font-family="DejaVu Sans, sans-serif" font-size="34" font-weight="700" letter-spacing="4">POCKET TANK</text>
+  <text x="240" y="105" text-anchor="middle" fill="#78dfe5" font-family="DejaVu Sans, sans-serif" font-size="14" letter-spacing="3">A TINY WORLD, IN YOUR HANDS</text>
+  <rect x="37" y="137" width="406" height="427" rx="30" fill="#06131f" stroke="#49dbe0" stroke-width="5"/>
+  <rect x="53" y="153" width="374" height="395" rx="20" fill="url(#tank)"/>
+  <path d="M54 259 Q114 247 172 258 T292 258 T426 256 V518 Q426 548 397 548 H83 Q54 548 54 518Z" fill="url(#water)"/>
+  <path d="M55 260 Q114 248 172 259 T292 259 T425 257" fill="none" stroke="#b4ffff" stroke-width="4" opacity=".82"/>
+  <path d="M79 190 126 190 173 260 147 260Z M330 190 353 190 311 260 288 260Z" fill="#c7ffff" opacity=".08"/>
+  <g fill="#d5ffff" opacity=".85"><circle cx="99" cy="326" r="5"/><circle cx="111" cy="307" r="3"/><circle cx="365" cy="351" r="4"/><circle cx="375" cy="335" r="2.5"/><circle cx="297" cy="294" r="3"/><circle cx="304" cy="278" r="2"/></g>
+  <g fill="none" stroke="#53dcaa" stroke-width="9" stroke-linecap="round"><path d="M91 534 Q103 464 92 413 M111 536 Q130 478 131 438 M365 536 Q345 469 355 418 M386 536 Q370 489 376 461"/><path d="M92 465q-31-24-35-2 M97 446q27-25 32-2 M354 477q-27-25-34-1 M371 492q26-23 33-1" stroke-width="6"/></g>
+  <g fill="#b9aa79"><ellipse cx="130" cy="536" rx="23" ry="8"/><ellipse cx="177" cy="539" rx="15" ry="6"/><ellipse cx="316" cy="538" rx="20" ry="7"/><ellipse cx="348" cy="533" rx="13" ry="6"/></g>
+  <g fill="url(#fish)"><ellipse cx="244" cy="363" rx="48" ry="25"/><path d="M199 363 169 341v44z"/><path d="M243 340q17 17 0 42q-17-21 0-42" fill="#fff0bd" opacity=".75"/><circle cx="261" cy="356" r="4" fill="#132636"/><ellipse cx="329" cy="413" rx="29" ry="15"/><path d="M301 413 282 399v29z"/><circle cx="339" cy="410" r="2.5" fill="#132636"/></g>
+  <text x="240" y="604" text-anchor="middle" fill="#bceef0" font-family="DejaVu Sans, sans-serif" font-size="16" letter-spacing="2">CARE • DISCOVER • GROW</text>
+</svg>

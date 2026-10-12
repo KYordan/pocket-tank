@@ -1,0 +1,14 @@
+Pocket Tank ArkOS port: third-party license notices
+====================================================
+
+LVGL
+----
+The SDL simulator uses LVGL v9.2.2.
+
+Copyright (c) 2021 LVGL Kft
+
+LVGL is distributed under the MIT License. The full license text is available at:
+https://github.com/lvgl/lvgl/blob/v9.2.2/LICENCE.txt
+
+The upstream Pocket Tank project contains additional third-party components;
+see their respective source directories and license files.
